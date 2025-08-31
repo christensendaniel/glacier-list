@@ -1,0 +1,68 @@
+name: Future Windows Testing
+
+# This workflow tests against upcoming Windows versions to ensure compatibility
+# before they become the default in windows-latest
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  test-future-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2025]  # Test Windows Server 2025 when available
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        # "3.14" will be added when officially released (October 2025)
+
+    # Continue on error since this is testing future compatibility
+    continue-on-error: true
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+
+    - name: Run tests with pytest
+      run: |
+        python -m pytest --cov=paged_list --cov-report=xml --cov-report=term-missing
+
+    - name: Test package installation
+      run: |
+        pip install .
+        python -c "from paged_list import PagedList; print('Import successful on Windows 2025')"
+
+    - name: Test basic functionality
+      run: |
+        python -c "
+        from paged_list import PagedList
+        import tempfile
+        import os
+
+        # Test basic functionality
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cl = PagedList(disk_path=tmpdir, chunk_size=10)
+            cl.append({'test': 'data'})
+            assert len(cl) == 1
+            items = list(cl)
+            assert items[0]['test'] == 'data'
+            print(f'Windows 2025 compatibility test passed on Python {os.sys.version}')
+        "
+
+    - name: Report Results
+      if: always()
+      run: |
+        echo "Windows 2025 testing completed. Check logs for any compatibility issues."

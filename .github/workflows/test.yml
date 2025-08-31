@@ -1,0 +1,88 @@
+name: Tests
+
+# Runner Configuration Notes:
+# - ubuntu-latest: Always use latest Ubuntu for Linux testing
+# - windows-2022: Use Windows Server 2022 (windows-latest migrates to 2025 on Sept 2, 2025)
+# - macos-13: Use macOS 13 (macos-latest migrated to macOS 15 on Aug 4, 2025)
+# See: https://github.com/actions/runner-images/issues/12677
+# See: https://github.com/actions/runner-images/issues/12520
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-2022, macos-13]  # Use specific versions for stability
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        # "3.14" will be added when officially released (October 2025)
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install hatch
+
+    - name: Run tests with Hatch
+      run: |
+        hatch run test:cov
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  compatibility-check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Upgrade pip
+      run: |
+        python -m pip install --upgrade pip
+
+    - name: Test package installation
+      run: |
+        pip install .
+        python -c "from paged_list import PagedList; print('Import successful')"
+
+    - name: Test basic functionality
+      run: |
+        python -c "
+        from paged_list import PagedList
+        import tempfile
+        import os
+
+        # Test basic functionality
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cl = PagedList(disk_path=tmpdir, chunk_size=10)
+            cl.append({'test': 'data'})
+            assert len(cl) == 1
+            assert cl[0]['test'] == 'data'
+            print(f'Basic test passed on Python {os.sys.version}')
+        "
