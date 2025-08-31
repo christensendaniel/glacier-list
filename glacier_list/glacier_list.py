@@ -51,9 +51,9 @@ class GlacierList:
         self.chunk_size = chunk_size  # Max items per chunk
         self.disk_path = disk_path  # Directory to store chunk files
         self.chunk_count = 0  # Number of chunk files
-        self._in_memory_list: List[
-            Dict[str, Any]
-        ] = []  # Temporary storage before flushing to disk
+        self._in_memory_list: List[Dict[str, Any]] = (
+            []
+        )  # Temporary storage before flushing to disk
         self._file_identifier = (
             uuid.uuid4().hex
         )  # Random hex identifier for file names so they don't overwrite

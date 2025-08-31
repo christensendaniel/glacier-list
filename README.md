@@ -187,17 +187,43 @@ Typical performance characteristics:
 
 ## Development
 
-For development setup, see [CONTRIBUTING.md](CONTRIBUTING.md).
+This project uses [Hatch](https://hatch.pypa.io/) for development environment management and packaging.
 
-Run tests:
+### Development Quick Start
 
 ```bash
-pytest
+# Install Hatch
+pip install hatch
+
+# Run tests
+hatch run test
+
+# Run tests with coverage
+hatch run test-cov
+
+# Format and lint code
+hatch run format
+hatch run lint
+
+# Run everything (format, lint, test with coverage)
+hatch run all
 ```
 
-Run examples:
+### Hatch Environments
+
+- **default**: Main development environment with all tools
+- **test**: Testing across Python 3.9-3.13
+- **docs**: Documentation building
+
+For detailed development setup, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Legacy Commands
 
 ```bash
+# Also works (legacy pytest)
+pytest
+
+# Run examples
 python -m glacier_list demo      # Small demonstration
 python -m glacier_list example   # Full example with 1M items
 ```

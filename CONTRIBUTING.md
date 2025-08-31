@@ -4,6 +4,10 @@ Thank you for your interest in contributing to glacier-list! This document provi
 
 ## Development Setup
 
+This project uses [Hatch](https://hatch.pypa.io/) for development environment management and packaging.
+
+### Option 1: Using Hatch (Recommended)
+
 1. Clone the repository:
 
 ```bash
@@ -11,14 +15,37 @@ git clone https://github.com/christensendaniel/glacier-list.git
 cd glacier-list
 ```
 
-2. Create a virtual environment:
+1. Install Hatch:
+
+```bash
+pip install hatch
+```
+
+1. Run tests to verify setup:
+
+```bash
+hatch run test
+```
+
+That's it! Hatch will automatically manage the virtual environment and dependencies.
+
+### Option 2: Traditional Setup
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/christensendaniel/glacier-list.git
+cd glacier-list
+```
+
+1. Create a virtual environment:
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install the package in development mode:
+1. Install the package in development mode:
 
 ```bash
 pip install -e ".[dev]"
@@ -26,15 +53,26 @@ pip install -e ".[dev]"
 
 ## Running Tests
 
-Run the test suite:
+### Testing with Hatch (Recommended)
 
 ```bash
-pytest
+# Run tests
+hatch run test
+
+# Run tests with coverage
+hatch run test-cov
+
+# Run tests across all Python versions
+hatch run test:run
 ```
 
-Run tests with coverage:
+### Testing with Traditional Tools
 
 ```bash
+# Run the test suite
+pytest
+
+# Run tests with coverage
 pytest --cov=glacier_list
 ```
 
@@ -43,13 +81,28 @@ pytest --cov=glacier_list
 This project uses several tools for code quality:
 
 - **Black** for code formatting
+- **isort** for import sorting
 - **flake8** for linting
 - **mypy** for type checking
 
-Run all checks:
+### Code Quality with Hatch (Recommended)
+
+```bash
+# Format code
+hatch run format
+
+# Check code quality
+hatch run lint
+
+# Run everything (format, lint, test with coverage)
+hatch run all
+```
+
+### Code Quality with Traditional Tools
 
 ```bash
 black glacier_list tests examples
+isort glacier_list tests examples
 flake8 glacier_list tests examples
 mypy glacier_list
 ```
