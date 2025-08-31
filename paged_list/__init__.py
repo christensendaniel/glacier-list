@@ -22,7 +22,7 @@ Example:
     ...     print(f"Stored {len(pl)} records using minimal memory")
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 __author__ = "Christensen, Daniel"
 __email__ = "christensen.daniel+pagedlist@outlook.com"
 

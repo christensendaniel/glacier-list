@@ -59,6 +59,7 @@ Homepage = "https://github.com/christensendaniel/paged-list"
 Documentation = "https://paged-list.readthedocs.io/"
 Repository = "https://github.com/christensendaniel/paged-list.git"
 "Bug Tracker" = "https://github.com/christensendaniel/paged-list/issues"
+"PyPI" = "https://pypi.org/project/paged-list/"
 
 [project.scripts]
 paged-list = "paged_list.main:main"

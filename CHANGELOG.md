@@ -7,7 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## \[Unreleased\]
 
-## \[1.0.0\] - 2025-08-30
+## \[0.1.2\] - 2025-08-31
+
+### Documentation
+
+- Added Read the Docs configuration (.readthedocs.yaml)
+- Created comprehensive Sphinx documentation structure
+- Added API reference documentation with autodoc
+- Created quickstart guide and examples documentation
+- Updated documentation with PyPI badges and links
+- Improved README with status badges and package information
+- Updated project URLs to use Read the Docs for documentation
+
+### Infrastructure
+
+- Updated GitHub Actions to latest versions (upload-artifact v4, download-artifact v4, setup-python v5)
+- Fixed deprecation warnings in CI/CD pipeline
+
+## \[0.1.1\] - 2025-08-31
+
+### CI/CD
+
+- GitHub Actions workflow fixes for PyPI publishing
+
+## \[0.1.0\] - 2025-08-31
 
 ### Added
 

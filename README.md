@@ -1,6 +1,20 @@
 # Paged List
 
+[![PyPI version](https://badge.fury.io/py/paged-list.svg)](https://badge.fury.io/py/paged-list)
+[![Python versions](https://img.shields.io/pypi/pyversions/paged-list.svg)](https://pypi.org/project/paged-list/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/christensendaniel/paged-list/workflows/Tests/badge.svg)](https://github.com/christensendaniel/paged-list/actions)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 A Python package that provides a disk-backed list implementation for handling large datasets efficiently. When your data gets too large for memory, paged-list automatically chunks it into pickle files on disk, only loading relevant chunks when needed.
+
+## Links
+
+- **PyPI Package**: [https://pypi.org/project/paged-list/](https://pypi.org/project/paged-list/)
+- **Documentation**: [https://paged-list.readthedocs.io/](https://paged-list.readthedocs.io/)
+- **Source Code**: [https://github.com/christensendaniel/paged-list](https://github.com/christensendaniel/paged-list)
+- **Issues**: [https://github.com/christensendaniel/paged-list/issues](https://github.com/christensendaniel/paged-list/issues)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
 ## Features
 
@@ -23,6 +37,8 @@ Install from PyPI:
 ```bash
 pip install paged-list
 ```
+
+**PyPI Package**: [https://pypi.org/project/paged-list/](https://pypi.org/project/paged-list/)
 
 **Note:** Python 3.9+ is required. If you're using an older Python version, please upgrade before installing.
 
@@ -236,7 +252,7 @@ paged-list was created by **Christensen Daniel**, a passionate data engineer who
 
 - **LinkedIn**: [dbchristensen](https://www.linkedin.com/in/dbchristensen/) - For data engineering insights and project updates
 - **GitHub**: [christensendaniel](https://github.com/christensendaniel) - Explore more projects and contributions
-- **Email**: christensen.daniel+pagedlist@outlook.com
+- **Email**: [christensen.daniel+pagedlist@outlook.com](mailto:christensen.daniel+pagedlist@outlook.com)
 
 ## License
 
