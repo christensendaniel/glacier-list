@@ -5,7 +5,7 @@ This module provides entry points for running demonstrations and examples
 of the professional disk-backed list implementation.
 """
 
-from .paged_list import PagedList, example_usage
+from .paged_list import PagedList
 
 
 def demo() -> None:
@@ -37,7 +37,21 @@ def main() -> None:
     if len(sys.argv) > 1 and sys.argv[1] == "demo":
         demo()
     elif len(sys.argv) > 1 and sys.argv[1] == "example":
-        example_usage()
+        # Import and run the comprehensive example
+        try:
+            import os
+            import sys
+
+            # Add the package root to path to allow importing examples
+            package_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            sys.path.insert(0, package_root)
+            from examples.comprehensive_usage import example_usage
+
+            example_usage()
+        except ImportError:
+            print(
+                "Example not available. Please ensure examples/comprehensive_usage.py exists."
+            )
     else:
         print(
             "paged-list: A disk-backed list implementation for handling large "
@@ -45,7 +59,7 @@ def main() -> None:
         )
         print("\nAvailable commands:")
         print("  demo    - Run a small demonstration")
-        print("  example - Run the full example with 1M items")
+        print("  example - Run a comprehensive usage example")
 
 
 if __name__ == "__main__":
