@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## \[Unreleased\]
 
+## \[0.1.3\] - 2025-09-01
+
+### Features
+
+- Complete Python list API implementation with all standard list methods
+- Comprehensive type safety with improved error handling
+- Context manager support for automatic resource cleanup
+- Professional warning system for memory-intensive operations
+
+### Improvements
+
+- Updated comprehensive usage example to use smaller dataset to avoid memory warnings
+- Improved CLI help text for clearer user guidance
+- Enhanced test coverage to 94% with comprehensive edge case testing
+
+### Bug Fixes
+
+- Resolved memory warning issues in example usage
+- Fixed CLI example command to run without performance warnings
+- Improved error handling in destructor and edge cases
+
+### Development & Testing
+
+- Added 152+ comprehensive test cases across all functionality
+- Improved code coverage from 78% to 94%
+- Enhanced development workflow with better testing infrastructure
+
 ## \[0.1.2\] - 2025-08-31
 
 ### Documentation

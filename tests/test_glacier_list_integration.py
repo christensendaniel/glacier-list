@@ -489,7 +489,8 @@ class TestPagedListIntegration:
         assert len(paged_list) == 5000
         assert paged_list.chunk_count > 0
         print(
-            f"✓ Final dataset: {len(paged_list)} items in {paged_list.chunk_count} chunks"
+            f"✓ Final dataset: {len(paged_list)} items in "
+            f"{paged_list.chunk_count} chunks"
         )
 
         # Test that we can still access items efficiently

@@ -22,11 +22,11 @@ Example:
     ...     print(f"Stored {len(pl)} records using minimal memory")
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "Christensen, Daniel"
 __email__ = "christensen.daniel+pagedlist@outlook.com"
 
 # Import main functionality
-from .paged_list import PagedList, append_data, example_usage
+from .paged_list import PagedList
 
-__all__ = ["PagedList", "append_data", "example_usage"]
+__all__ = ["PagedList"]

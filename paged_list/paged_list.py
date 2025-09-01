@@ -22,6 +22,7 @@ import logging
 import os
 import pickle
 import uuid
+import warnings
 from typing import (
     Any,
     Callable,
@@ -137,15 +138,19 @@ class PagedList:
         return []  # Return empty if file is missing
 
     def __iter__(self) -> Iterator[Dict[str, Any]]:
-        """Iterates over all records without loading them into memory."""
-        for chunk_index in range(self.chunk_count):
-            chunk_data = self._load_chunk(chunk_index)
-            for record in chunk_data:
-                yield record  # Yield one record at a time (memory efficient)
+        """Iterate over all items in the list."""
+        # Warn if multiple chunks exist (indicates large dataset being loaded)
+        if self.chunk_count > 0:
+            warnings.warn(
+                "Iterating over PagedList with disk-backed chunks loads all "
+                "data into memory. This may be slow and memory-intensive for "
+                "large lists.",
+                UserWarning,
+                stacklevel=2,
+            )
 
-        # Yield remaining items in memory (not yet written to disk)
-        for record in self._in_memory_list:
-            yield record
+        for i in range(len(self)):
+            yield self[i]  # type: ignore
 
     def __contains__(self, item: Dict[str, Any]) -> bool:
         """Check if an item is in the list."""
@@ -405,9 +410,6 @@ class PagedList:
         """Check inequality."""
         return not self.__eq__(other)
 
-    def __list__(self) -> List[Dict[str, Any]]:
-        return self.combine_chunks()
-
     def __enter__(self) -> "PagedList":
         """Context manager entry."""
         return self
@@ -491,96 +493,142 @@ class PagedList:
         new_list.extend(self)
         return new_list
 
+    def sort(
+        self,
+        *,
+        key: Optional[Callable[[Dict[str, Any]], Any]] = None,
+        reverse: bool = False,
+    ) -> None:
+        """Sort the list in place.
 
-def append_data(cl: PagedList, num_items: int) -> None:
-    """Appends a specified number of items to the PagedList.
+        Warning: This operation loads all data into memory and may be slow for large lists.
+        Note: A key function is required when sorting dictionaries.
+        """
+        if self.chunk_count > 0:
+            warnings.warn(
+                "Sorting a PagedList with multiple chunks loads all data "
+                "into memory. This may be slow and memory-intensive for "
+                "large lists.",
+                UserWarning,
+                stacklevel=2,
+            )
 
-    Args:
-        cl (PagedList): The PagedList instance to append data to.
-        num_items (int): The number of items to append to the list.
-    """
-    for i in range(num_items):
-        cl.append({"id": i, "value": i * 2})
-    print(cl)  # Display object info
+        if key is None:
+            raise TypeError(
+                "sort() missing required argument: 'key' (dictionaries "
+                "require a key function)"
+            )
 
+        # Load all data, sort it, then rebuild the list
+        all_items = list(self)
+        all_items.sort(key=key, reverse=reverse)
 
-def example_usage() -> None:
-    """Demonstrate the usage of PagedList."""
-    # Create the disk-backed list
-    cl = PagedList(chunk_size=50_000)
+        # Rebuild the list
+        self.clear()
+        for item in all_items:
+            self.append(item)
 
-    # First appending phase
-    num_items = 1_000_000
-    batch_size = 1_000_010
-    for i in range(0, num_items, batch_size):
-        append_data(cl, batch_size)
+    def reverse(self) -> None:
+        """Reverse the list in place.
 
-    # Verify a single item retrieval
-    print(cl[10_000])
+        Warning: This operation loads all data into memory and may be slow for large lists.
+        """
+        if self.chunk_count > 0:
+            warnings.warn(
+                "Reversing a PagedList with multiple chunks loads all data "
+                "into memory. This may be slow and memory-intensive for "
+                "large lists.",
+                UserWarning,
+                stacklevel=2,
+            )
 
-    # Check the length of the list
-    print(len(cl))
+        # Load all data, reverse it, then rebuild the list
+        all_items = list(self)
+        all_items.reverse()
 
-    # Grab a slice assumed to be between two chunks
-    print(cl[49_999:50_001])
+        # Rebuild the list
+        self.clear()
+        for item in all_items:
+            self.append(item)
 
-    # Update an item
-    cl[10_000] = {"id": 10_000, "value": 42}
+    def __add__(self, other: Union[List[Dict[str, Any]], "PagedList"]) -> "PagedList":
+        """Concatenate with another list or PagedList."""
+        if self.chunk_count > 0:
+            warnings.warn(
+                "Adding lists with a multi-chunk PagedList loads all data into memory. "
+                "Consider using extend() for better memory efficiency.",
+                UserWarning,
+                stacklevel=2,
+            )
 
-    # Show that the item is updated
-    print(cl[10_000])
+        new_list = self.copy()
+        if isinstance(other, PagedList):
+            new_list.extend(other)
+        elif isinstance(other, list):
+            new_list.extend(other)
+        else:
+            raise TypeError(f"Cannot concatenate PagedList with {type(other)}")
+        return new_list
 
-    # Test extending the list
-    cl.extend([{"id": 10_001, "value": 43}, {"id": 10_002, "value": 44}])
+    def __mul__(self, other: int) -> "PagedList":
+        """Repeat the list."""
+        if not isinstance(other, int):
+            raise TypeError(f"Cannot multiply PagedList by {type(other)}")
 
-    # show the updated length
-    print(f"Length after extending: {len(cl)}")
+        if other < 0:
+            other = 0
 
-    # Serialize the list
-    # to test serialization lets edit values in the middle of the list
-    cl[10_000] = {
-        "id": 10_000,
-        "value": 42,
-        "new_value": "hello",
-        "new_list": [1, 2, 3],
-        "new_dict": {"a": 1, "b": 2},
-        "new_bool": True,
-    }
-    cl.serialize()
+        if self.chunk_count > 0 and other > 1:
+            warnings.warn(
+                "Multiplying a multi-chunk PagedList loads all data into memory. "
+                "This may be slow and memory-intensive for large lists.",
+                UserWarning,
+                stacklevel=2,
+            )
 
-    # Test to ensure no instance of list, bool, or dict within the values
-    # from cl[9_000:11_000]
-    for record in cl[9_000:11_000]:
-        for value in record.values():  # type: ignore
-            assert not isinstance(
-                value, (list, bool, dict)
-            ), f"Found instance of {type(value)} in record {record}"
-    print("Serialization test passed")
+        new_list = PagedList(chunk_size=self.chunk_size, disk_path=self.disk_path)
+        for _ in range(other):
+            new_list.extend(self)
+        return new_list
 
-    # Apply a function to all records
-    def add_one(record: Dict[str, Any]) -> Dict[str, Any]:
-        record["value"] += 1
-        return record
+    def __rmul__(self, other: int) -> "PagedList":
+        """Repeat the list (reverse multiplication)."""
+        return self.__mul__(other)
 
-    value_before = cl[10_500]["value"]  # type: ignore
-    cl.map(add_one)
-    value_after = cl[10_500]["value"]  # type: ignore
-    # Verify the updated value
-    assert (
-        value_after == value_before + 1
-    ), f"Expected {value_before + 1}, got {value_after}"
+    def __reversed__(self) -> Iterator[Dict[str, Any]]:
+        """Return a reverse iterator."""
+        if self.chunk_count > 0:
+            warnings.warn(
+                "Creating a reverse iterator for a multi-chunk PagedList "
+                "loads all data into memory. This may be slow and "
+                "memory-intensive for large lists.",
+                UserWarning,
+                stacklevel=2,
+            )
 
-    print(
-        f"The length of the list is {len(cl)} and the length of the list "
-        f"converted to a list is {len(list(cl))}"
-    )
+        # For efficiency, we'll load all data and reverse it
+        all_items = list(self)
+        return reversed(all_items)
 
-    cl[10:12] = [
-        {"id": 10, "value": 42, "new_value": "hello"},
-        {"id": 11, "value": 99, "new_list": [1, 2, 3]},
-    ]
+    def __list__(self) -> List[Dict[str, Any]]:
+        """Convert to a regular list with warning if chunked."""
+        if self.chunk_count > 0:
+            warnings.warn(
+                "Converting a multi-chunk PagedList to list loads all data "
+                "into memory and loses the disk-backed storage benefits. "
+                "Consider iterating directly over the PagedList instead.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return self.combine_chunks()
 
-    print(cl[10:12])  # Verify update
-
-    # Cleanup disk
-    cl.cleanup_chunks()
+    def __tuple__(self) -> tuple:
+        """Convert to tuple with warning."""
+        if self.chunk_count > 0:
+            warnings.warn(
+                "Converting a multi-chunk PagedList to tuple loads all data "
+                "into memory and loses the disk-backed storage benefits.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return tuple(self.combine_chunks())
